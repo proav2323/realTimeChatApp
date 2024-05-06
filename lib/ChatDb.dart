@@ -184,4 +184,46 @@ class ChatDb {
 
     return true;
   }
+
+  Future<bool> deleteMessage(String chatId, String messageId, String userId,
+      String chatLastMessage, String prevMessage) async {
+    if (chatLastMessage == prevMessage) {
+      await db
+          .collection("users")
+          .doc(chatId)
+          .collection("chats")
+          .doc(userId)
+          .update({
+        "lastMessage": "message was deleted",
+      });
+
+      await db
+          .collection("users")
+          .doc(userId)
+          .collection("chats")
+          .doc(chatId)
+          .update({
+        "lastMessage": "message was deleted",
+      });
+    }
+
+    await db
+        .collection("users")
+        .doc(userId)
+        .collection("chats")
+        .doc(chatId)
+        .collection("messages")
+        .doc(messageId)
+        .update({"deleted": true});
+    await db
+        .collection("users")
+        .doc(chatId)
+        .collection("chats")
+        .doc(userId)
+        .collection("messages")
+        .doc(messageId)
+        .update({"deleted": true});
+
+    return true;
+  }
 }

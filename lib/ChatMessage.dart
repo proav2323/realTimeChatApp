@@ -50,6 +50,37 @@ class _ChatMessageState extends State<ChatMessage> {
                   chatLastMessage: widget.prevMessage,
                 ),
               ));
+    } else if (value == "delete") {
+      showDialog<String>(
+        context: context,
+        builder: (BuildContext context) => AlertDialog(
+          title: const Text('Delete Message'),
+          content: Text("the message ${message.message} will be deleted"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.pop(context, 'Cancel'),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () async {
+                bool data = await ChatDb().deleteMessage(
+                    widget.chatId,
+                    message.id,
+                    context.read<UserCubit>().state!.id,
+                    widget.prevMessage,
+                    message.message);
+                Navigator.pop(context, 'ok');
+
+                if (data == true) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text("message deleted")));
+                }
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     }
   }
 
@@ -89,32 +120,32 @@ class _ChatMessageState extends State<ChatMessage> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Container(
-                                margin: EdgeInsets.only(left: 5),
+                                margin: const EdgeInsets.only(left: 5),
                                 child: Text(
                                   DateFormat("MM-dd HH:mm")
                                       .format(message.created_at.toDate()),
-                                  style: TextStyle(fontSize: 12),
+                                  style: const TextStyle(fontSize: 12),
                                 )),
                             message.senderId ==
                                     context.read<UserCubit>().state!.id
                                 ? message.seen
                                     ? Container(
-                                        child: Icon(
+                                        margin: const EdgeInsets.only(
+                                            right: 5, left: 5),
+                                        child: const Icon(
                                           Icons.remove_red_eye_sharp,
                                           size: 12,
                                         ),
-                                        margin:
-                                            EdgeInsets.only(right: 5, left: 5),
                                       )
                                     : Container(
-                                        child: Icon(
+                                        margin: const EdgeInsets.only(
+                                            right: 5, left: 5),
+                                        child: const Icon(
                                           Icons.check,
                                           size: 12,
                                         ),
-                                        margin:
-                                            EdgeInsets.only(right: 5, left: 5),
                                       )
-                                : SizedBox()
+                                : const SizedBox()
                           ],
                         )
                       ],
