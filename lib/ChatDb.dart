@@ -1,4 +1,7 @@
+import 'dart:io';
+import 'package:path/path.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:realtimechatapp/Auth.dart';
 import 'package:realtimechatapp/Chat.dart';
 import 'package:realtimechatapp/Messages.dart';
@@ -7,6 +10,7 @@ import 'package:uuid/uuid.dart';
 
 class ChatDb {
   FirebaseFirestore db = FirebaseFirestore.instance;
+  FirebaseStorage storage = FirebaseStorage.instance;
 
   Future<List<Chat>?> getAllUserChats(String userId) async {
     DocumentReference userRef = db.collection("users").doc(userId);
@@ -225,5 +229,35 @@ class ChatDb {
         .update({"deleted": true});
 
     return true;
+  }
+
+  Future<bool> updateProfile(String name, File? Img, String userId) async {
+    if (Img != null) {
+      final storageRef = FirebaseStorage.instance.ref();
+      final uploadTask = storageRef.child("images/${basename(Img.path)}");
+
+      try {
+        await uploadTask.putFile(Img);
+        String url = await storageRef
+            .child("images/${basename(Img.path)}")
+            .getDownloadURL();
+
+        await db
+            .collection("users")
+            .doc(userId)
+            .update({"name": name, "profileImg": url});
+
+        return true;
+      } on FirebaseException catch (e) {
+        return false;
+      }
+    } else {
+      await db
+          .collection("users")
+          .doc(userId)
+          .update({"name": name, "profileImg": url});
+
+      return true;
+    }
   }
 }

@@ -13,6 +13,7 @@ import 'package:realtimechatapp/ChatUi.dart';
 import 'package:realtimechatapp/PopumMenu.dart';
 import 'package:realtimechatapp/Socket.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:realtimechatapp/UpdateProfile.dart';
 import 'package:realtimechatapp/User.dart' as Us;
 import 'package:realtimechatapp/UserUi.dart';
 import 'package:realtimechatapp/pages/Login.dart';
@@ -40,6 +41,11 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   Future<void> selectedUpadte(String value) async {
     if (value == "update") {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) => const Dialog(
+                child: UpdateProfile(),
+              ));
     } else if (value == "settings") {
     } else {
       auth.signOut().then((value) {
