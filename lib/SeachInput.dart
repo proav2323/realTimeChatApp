@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class Input extends StatelessWidget {
-  const Input({
+class SearchInput extends StatelessWidget {
+  const SearchInput({
     super.key,
     required this.controller,
     required this.title,
@@ -34,7 +34,15 @@ class Input extends StatelessWidget {
         child: TextFormField(
           controller: controller,
           decoration: InputDecoration(
-            border: const OutlineInputBorder(),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: BorderSide(
+                color: Theme.of(context).cardColor,
+                style: BorderStyle.solid,
+              ),
+            ),
+            filled: true,
+            fillColor: Theme.of(context).cardColor,
             labelText: title,
             errorText: error != "" ? error : null,
           ),

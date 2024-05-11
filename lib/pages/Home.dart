@@ -10,7 +10,10 @@ import 'package:realtimechatapp/Auth.dart';
 import 'package:realtimechatapp/Chat.dart';
 import 'package:realtimechatapp/ChatDb.dart';
 import 'package:realtimechatapp/ChatUi.dart';
+import 'package:realtimechatapp/Input.dart';
 import 'package:realtimechatapp/PopumMenu.dart';
+import 'package:realtimechatapp/SeachInput.dart';
+import 'package:realtimechatapp/SearchPage.dart';
 import 'package:realtimechatapp/Socket.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:realtimechatapp/UpdateProfile.dart';
@@ -38,6 +41,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   bool chatLoading = false;
   Stream<QuerySnapshot> chatStream = Stream.empty();
   Stream<QuerySnapshot> userStream = Stream.empty();
+  TextEditingController search = TextEditingController();
 
   Future<void> selectedUpadte(String value) async {
     if (value == "update") {
@@ -133,6 +137,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    search.dispose();
     super.dispose();
   }
 
@@ -226,8 +231,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                   title: Text("Chatty"),
                   actions: state != null
                       ? [
-                          IconButton(
-                              onPressed: () {}, icon: const Icon(Icons.search)),
                           state.profileImg != ""
                               ? CustomPopumMenu(
                                   icon: SizedBox(
@@ -334,6 +337,33 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                 )
                         ]
                       : [],
+                  bottom: PreferredSize(
+                      preferredSize:
+                          Size(MediaQuery.of(context).size.width, 70),
+                      child: Container(
+                        width: double.infinity,
+                        margin: const EdgeInsets.all(8),
+                        child: SizedBox(
+                            width: double.infinity,
+                            child: SearchInput(
+                              controller: search,
+                              title: "Search",
+                              padding: EdgeInsets.symmetric(
+                                  vertical: 0, horizontal: 2),
+                              error: "",
+                              validate: (String val) {},
+                              gradiantColors: const [],
+                              submit: (String val) {
+                                if (val != "") {
+                                  Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                          builder: (context) =>
+                                              SearchPage(search: val)));
+                                }
+                              },
+                            )),
+                      )),
                 ),
                 body: SingleChildScrollView(
                     child: Column(

@@ -37,6 +37,7 @@ class MyApp extends StatelessWidget {
             primaryColor: Color.fromARGB(221, 255, 237, 237),
             popupMenuTheme:
                 PopupMenuThemeData(color: Color.fromARGB(221, 255, 237, 237)),
+            cardColor: Color.fromARGB(255, 244, 244, 244),
             useMaterial3: true,
             /* light theme settings */
           ),
@@ -48,6 +49,7 @@ class MyApp extends StatelessWidget {
             primaryColor: Color.fromARGB(221, 44, 43, 43),
             popupMenuTheme:
                 PopupMenuThemeData(color: Color.fromARGB(221, 48, 48, 48)),
+            cardColor: const Color.fromARGB(255, 40, 40, 40),
             useMaterial3: true,
             /* dark theme settings */
           ),
