@@ -38,6 +38,9 @@ class MyApp extends StatelessWidget {
             popupMenuTheme:
                 PopupMenuThemeData(color: Color.fromARGB(221, 255, 237, 237)),
             cardColor: Color.fromARGB(255, 244, 244, 244),
+            dialogTheme: DialogTheme(
+              backgroundColor: const Color.fromARGB(255, 255, 244, 244),
+            ),
             useMaterial3: true,
             /* light theme settings */
           ),
@@ -50,6 +53,9 @@ class MyApp extends StatelessWidget {
             popupMenuTheme:
                 PopupMenuThemeData(color: Color.fromARGB(221, 48, 48, 48)),
             cardColor: const Color.fromARGB(255, 40, 40, 40),
+            dialogTheme: DialogTheme(
+              backgroundColor: Color.fromARGB(255, 20, 20, 20),
+            ),
             useMaterial3: true,
             /* dark theme settings */
           ),

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/widgets.dart';
+import 'package:realtimechatapp/AddGroupDailog.dart';
 import 'package:realtimechatapp/Auth.dart';
 import 'package:realtimechatapp/Chat.dart';
 import 'package:realtimechatapp/ChatDb.dart';
@@ -365,6 +366,18 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                             )),
                       )),
                 ),
+                floatingActionButton: state != null
+                    ? FloatingActionButton(
+                        onPressed: () => showDialog(
+                          context: context,
+                          builder: (BuildContext context) =>
+                              const Dialog.fullscreen(
+                            child: AddGroup(),
+                          ),
+                        ),
+                        child: const Icon(Icons.add),
+                      )
+                    : const SizedBox(),
                 body: SingleChildScrollView(
                     child: Column(
                   children: [
