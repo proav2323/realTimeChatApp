@@ -107,10 +107,10 @@ class _ChatMessageState extends State<ChatMessage> {
                             decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(4)),
                             child: Text(
-                              message.deleted
+                              message.deleted == true
                                   ? "Message Was Deleted"
                                   : message.edited
-                                      ? "${message.message} (Edited)"
+                                      ? "${message.message} (edited)"
                                       : message.message,
                             ),
                           ),
@@ -192,7 +192,13 @@ class _ChatMessageState extends State<ChatMessage> {
                           padding: EdgeInsets.all(8),
                           decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(4)),
-                          child: Text(message.message),
+                          child: Text(
+                            message.deleted == true
+                                ? "Message Was Deleted"
+                                : message.edited
+                                    ? "${message.message} (edited)"
+                                    : message.message,
+                          ),
                         ),
                       ),
                       Row(

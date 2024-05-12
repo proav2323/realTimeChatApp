@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:realtimechatapp/GroupDb.dart';
 import 'package:realtimechatapp/GroupMember.dart';
 import 'package:realtimechatapp/Input.dart';
 import 'package:realtimechatapp/User.dart';
@@ -89,7 +90,29 @@ class _AddGroupState extends State<AddGroup> {
     }
   }
 
-  void create() {}
+  void create() {
+    validateName(name.text);
+
+    if (nameError == "" &&
+        members.length > 1 &&
+        context.read<UserCubit>().state != null) {
+      setState(() {
+        loading = true;
+      });
+      GroupDb()
+          .createGroup(name.text, members, context.read<UserCubit>().state!.id)
+          .then((value) {
+        if (value == true) {
+          setState(() {
+            loading = false;
+          });
+          Navigator.pop(context);
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text("Group Created")));
+        }
+      });
+    }
+  }
 
   void delte(String id) {
     if (context.read<UserCubit>().state == null ||

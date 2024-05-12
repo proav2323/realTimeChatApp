@@ -11,6 +11,7 @@ import 'package:realtimechatapp/Auth.dart';
 import 'package:realtimechatapp/Chat.dart';
 import 'package:realtimechatapp/ChatDb.dart';
 import 'package:realtimechatapp/ChatUi.dart';
+import 'package:realtimechatapp/GroupUi.dart';
 import 'package:realtimechatapp/Input.dart';
 import 'package:realtimechatapp/PopumMenu.dart';
 import 'package:realtimechatapp/SeachInput.dart';
@@ -381,6 +382,58 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                 body: SingleChildScrollView(
                     child: Column(
                   children: [
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection("groups")
+                            .where("members",
+                                arrayContains: auth.currentUser!.uid)
+                            .orderBy("lastMessageAt", descending: true)
+                            .snapshots(),
+                        builder: (context, snap) {
+                          if (snap.hasData == false) {
+                            return const SizedBox();
+                          }
+
+                          if (snap.data!.docs.isEmpty) {
+                            return const SizedBox();
+                          }
+
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Container(
+                                  padding: const EdgeInsets.only(left: 4),
+                                  child: const Text(
+                                    "Groups You In",
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w900,
+                                    ),
+                                  )),
+                              Container(
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 8, horizontal: 4),
+                                  width: MediaQuery.of(context).size.width,
+                                  child: ListView(
+                                    shrinkWrap: true,
+                                    children: snap.data == null
+                                        ? const [SizedBox()]
+                                        : snap.data!.docs
+                                            .map((e) {
+                                              return GroupUi(
+                                                  e: e,
+                                                  key: Key(
+                                                      "${ma.Random().nextDouble()}"));
+                                            })
+                                            .toList()
+                                            .cast(),
+                                  )),
+                            ],
+                          );
+                        }),
                     const SizedBox(
                       height: 10,
                     ),
