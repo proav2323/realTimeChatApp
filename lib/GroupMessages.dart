@@ -5,7 +5,8 @@ class GroupMessages {
   String message;
   bool deleted;
   bool edited;
-  List<String> seen;
+  List<dynamic> seen;
+  List<dynamic> recieverId;
   String id;
   Timestamp created_at;
 
@@ -17,5 +18,6 @@ class GroupMessages {
     required this.created_at,
     required this.seen,
     required this.id,
+    required this.recieverId,
   });
 }

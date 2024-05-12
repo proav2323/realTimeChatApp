@@ -63,6 +63,7 @@ class GroupDb {
       created_at: data.get("createdAt"),
       seen: data.get("seen"),
       id: data.get("id"),
+      recieverId: data.get("recieverId"),
     );
   }
 }
