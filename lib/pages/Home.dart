@@ -381,6 +381,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                     : const SizedBox(),
                 body: SingleChildScrollView(
                     child: Column(
+                  mainAxisSize: MainAxisSize.max,
                   children: [
                     const SizedBox(
                       height: 10,
@@ -393,11 +394,16 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                             .orderBy("lastMessageAt", descending: true)
                             .snapshots(),
                         builder: (context, snap) {
-                          if (snap.hasData == false) {
-                            return const SizedBox();
+                          if (snap.hasError) {
+                            log(snap.error.toString(), name: "error");
+                            return Text(snap.error.toString());
                           }
 
-                          if (snap.data!.docs.isEmpty) {
+                          if (snap.connectionState == ConnectionState.waiting) {
+                            return const CircularProgressIndicator();
+                          }
+
+                          if (snap.data == null || snap.data!.size == 0) {
                             return const SizedBox();
                           }
 
@@ -414,7 +420,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                     ),
                                   )),
                               Container(
-                                  padding: EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                       vertical: 8, horizontal: 4),
                                   width: MediaQuery.of(context).size.width,
                                   child: ListView(
@@ -424,9 +430,10 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
                                         : snap.data!.docs
                                             .map((e) {
                                               return GroupUi(
-                                                  e: e,
-                                                  key: Key(
-                                                      "${ma.Random().nextDouble()}"));
+                                                key: Key(
+                                                    "${ma.Random().nextDouble()}"),
+                                                e: e,
+                                              );
                                             })
                                             .toList()
                                             .cast(),

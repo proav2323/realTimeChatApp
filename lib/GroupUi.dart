@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:realtimechatapp/Group.dart';
@@ -20,19 +22,17 @@ class _GroupUiState extends State<GroupUi> {
     // TODO: implement initState
     super.initState();
     if (mounted == true && context.read<UserCubit>().state != null) {
-      if (mounted == true) {
-        setState(() {
-          chat = Group(
-            id: widget.e.get("id"),
-            messages: [],
-            lastMessage: widget.e.get("lastMessage"),
-            lastMessageAt: widget.e.get("lastMessageAt"),
-            createdBy: widget.e.get("createdBy"),
-            members: widget.e.get("members"),
-            name: widget.e.get("name"),
-          );
-        });
-      }
+      setState(() {
+        chat = Group(
+          id: widget.e.get("id"),
+          messages: [],
+          lastMessage: widget.e.get("lastMessage"),
+          lastMessageAt: widget.e.get("lastMessageAt"),
+          createdBy: widget.e.get("createdBy"),
+          members: widget.e.get("members"),
+          name: widget.e.get("name"),
+        );
+      });
     }
   }
 
@@ -44,68 +44,80 @@ class _GroupUiState extends State<GroupUi> {
                 .collection("groups")
                 .doc(widget.e.get("id"))
                 .collection("messages")
-                .where("senderId",
-                    isNotEqualTo: context.read<UserCubit>().state!.id)
-                .where("seen", isEqualTo: false)
+                .where("seen",
+                    whereNotIn: [context.read<UserCubit>().state!.id])
+                .where("recieverId",
+                    arrayContains: context.read<UserCubit>().state!.id)
                 .snapshots(),
-            builder: (context, snapshot) => GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => NewChat(
-                                id: chat!.id,
-                                userUi: false,
-                                chatLastMessage: chat!.lastMessage,
-                              )));
-                },
-                child: Card(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      const SizedBox(
-                        width: 50,
-                        height: 50,
-                        child: Icon(Icons.group),
-                      ),
-                      const SizedBox(width: 15),
-                      Expanded(
-                          child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            chat!.name,
-                            style: const TextStyle(fontSize: 18),
-                          ),
-                          const SizedBox(
-                            height: 2,
-                          ),
-                          Text(
-                            chat!.lastMessage,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Theme.of(context).disabledColor,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                log(snapshot.error.toString(), name: "group ui error");
+              }
+              return GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => NewChat(
+                                  id: chat!.id,
+                                  userUi: false,
+                                  chatLastMessage: chat!.lastMessage,
+                                )));
+                  },
+                  child: Card(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        const SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: Icon(Icons.group),
+                        ),
+                        const SizedBox(width: 15),
+                        Expanded(
+                            child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              chat!.name,
+                              style: const TextStyle(fontSize: 18),
                             ),
-                          )
-                        ],
-                      )),
-                      snapshot.hasData == true &&
-                              snapshot.data!.docs.length >= 1
-                          ? Container(
-                              width: 20,
-                              height: 20,
-                              decoration: BoxDecoration(
-                                  color: Colors.red,
-                                  borderRadius: BorderRadius.circular(24)),
-                              margin: EdgeInsets.only(right: 5),
-                              child: Center(
-                                  child: Text(
-                                      snapshot.data!.docs.length.toString())),
-                            )
-                          : const SizedBox()
-                    ],
-                  ),
-                )))
-        : const SizedBox();
+                            const SizedBox(
+                              height: 2,
+                            ),
+                            chat!.lastMessage != ""
+                                ? Text(
+                                    chat!.lastMessage,
+                                    style: TextStyle(
+                                      fontSize: 12,
+                                      color: Theme.of(context).disabledColor,
+                                    ),
+                                  )
+                                : const SizedBox()
+                          ],
+                        )),
+                        snapshot.hasData == true &&
+                                snapshot.data!.docs.length >= 1
+                            ? Container(
+                                width: 20,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                    color: Colors.red,
+                                    borderRadius: BorderRadius.circular(24)),
+                                margin: EdgeInsets.only(right: 5),
+                                child: Center(
+                                    child: Text(
+                                        snapshot.data!.docs.length.toString())),
+                              )
+                            : const SizedBox()
+                      ],
+                    ),
+                  ));
+            })
+        : const SizedBox(
+            height: 1,
+            width: 1,
+          );
   }
 }

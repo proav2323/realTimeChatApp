@@ -6,7 +6,7 @@ class Group {
   String id;
   String lastMessage;
   Timestamp lastMessageAt;
-  List<String> members;
+  List<dynamic> members;
   List<GroupMessages> messages;
   String name;
 

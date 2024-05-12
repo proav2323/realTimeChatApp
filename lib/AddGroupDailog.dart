@@ -26,14 +26,12 @@ class _AddGroupState extends State<AddGroup> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     members.add(context.read<UserCubit>().state!.id);
   }
 
   @override
   void dispose() {
-    // TODO: implement dispose
     super.dispose();
     name.dispose();
     email.dispose();
@@ -81,7 +79,7 @@ class _AddGroupState extends State<AddGroup> {
           email.clear();
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("no user found with this email")));
+              const SnackBar(content: Text("no user found with this email")));
         }
         setState(() {
           Addloading = false;
@@ -108,7 +106,7 @@ class _AddGroupState extends State<AddGroup> {
           });
           Navigator.pop(context);
           ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text("Group Created")));
+              .showSnackBar(const SnackBar(content: Text("Group Created")));
         }
       });
     }
@@ -129,7 +127,7 @@ class _AddGroupState extends State<AddGroup> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Padding(
-        padding: EdgeInsets.all(8),
+        padding: const EdgeInsets.all(8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
@@ -150,7 +148,7 @@ class _AddGroupState extends State<AddGroup> {
               title: "Name",
               error: nameError,
               validate: validateName,
-              gradiantColors: [],
+              gradiantColors: const [],
             ),
             const SizedBox(
               height: 10,
@@ -205,12 +203,12 @@ class _AddGroupState extends State<AddGroup> {
                         .toList()
                         .cast(),
                   ))
-                : Text("No Members Till Now"),
+                : const Text("No Members Till Now"),
             const SizedBox(
               height: 10,
             ),
             ElevatedButton(
-                onPressed: () {},
+                onPressed: create,
                 child: Row(
                   mainAxisSize: MainAxisSize.max,
                   mainAxisAlignment: MainAxisAlignment.center,
