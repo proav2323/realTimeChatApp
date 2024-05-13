@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realtimechatapp/ChatDb.dart';
+import 'package:realtimechatapp/GroupDb.dart';
 import 'package:realtimechatapp/Input.dart';
 import 'package:realtimechatapp/state/user/UserCubit.dart';
 
@@ -11,11 +12,13 @@ class EditDailog extends StatefulWidget {
     required this.chatId,
     required this.messageId,
     required this.chatLastMessage,
+    this.data = false,
   });
   String prevText;
   String chatId;
   String messageId;
   String chatLastMessage;
+  bool data;
 
   @override
   State<EditDailog> createState() => _EditDailogState();
@@ -55,13 +58,23 @@ class _EditDailogState extends State<EditDailog> {
         setState(() {
           loading = true;
         });
-        bool dataa = await ChatDb().updateMessage(
-            widget.chatId,
-            widget.messageId,
-            context.read<UserCubit>().state!.id,
-            controller.text,
-            widget.chatLastMessage,
-            widget.prevText);
+        bool dataa = widget.data
+            ? await GroupDb().updateMessage(
+                widget.chatId,
+                widget.messageId,
+                context.read<UserCubit>().state!.id,
+                controller.text,
+                widget.chatLastMessage,
+                widget.prevText,
+              )
+            : await ChatDb().updateMessage(
+                widget.chatId,
+                widget.messageId,
+                context.read<UserCubit>().state!.id,
+                controller.text,
+                widget.chatLastMessage,
+                widget.prevText,
+              );
 
         if (dataa == true) {
           ScaffoldMessenger.of(context)

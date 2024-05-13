@@ -63,7 +63,66 @@ class GroupDb {
       created_at: data.get("createdAt"),
       seen: data.get("seen"),
       id: data.get("id"),
-      recieverId: data.get("recieverId"),
+      recieverId: data.get("reciverId"),
     );
+  }
+
+  Future<bool> sendMessage(String message, String senderid, String cid,
+      List<dynamic> members) async {
+    await db.collection("groups").doc(cid).update({
+      "lastMessage": message,
+      "lastMessageAt": Timestamp.now(),
+    });
+    var uuid = Uuid();
+    String id = uuid.v4();
+    await db.collection("groups").doc(cid).collection("messages").doc(id).set({
+      "senderId": senderid,
+      "reciverId": members,
+      "message": message,
+      "deleted": false,
+      "edited": false,
+      "createdAt": Timestamp.now(),
+      "seen": [],
+      "id": id,
+    });
+    return true;
+  }
+
+  Future<bool> deleteMessage(String chatId, String messageId, String userId,
+      String chatLastMessage, String prevMessage) async {
+    if (chatLastMessage == prevMessage) {
+      await db.collection("groups").doc(chatId).update({
+        "lastMessage": "message was deleted",
+      });
+    }
+
+    await db
+        .collection("groups")
+        .doc(chatId)
+        .collection("messages")
+        .doc(messageId)
+        .update({"deleted": true});
+
+    return true;
+  }
+
+  Future<bool> updateMessage(String chatId, String messageId, String userId,
+      String mes, String chatLastMessage, String prevMessage) async {
+    if (chatLastMessage == prevMessage) {
+      await db.collection("groups").doc(chatId).update({
+        "lastMessage": mes,
+      });
+    }
+    await db
+        .collection("groups")
+        .doc(chatId)
+        .collection("messages")
+        .doc(messageId)
+        .update({
+      "message": mes,
+      "edited": true,
+    });
+
+    return true;
   }
 }

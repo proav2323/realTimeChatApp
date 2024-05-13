@@ -87,7 +87,7 @@ class _ChatMessageState extends State<ChatMessage> {
   @override
   Widget build(BuildContext context) {
     return loading == true
-        ? const SizedBox()
+        ? const CircularProgressIndicator()
         : Align(
             alignment: message.senderId == context.read<UserCubit>().state!.id
                 ? Alignment.centerRight

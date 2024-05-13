@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:realtimechatapp/Group.dart';
+import 'package:realtimechatapp/GroupChat.dart';
 import 'package:realtimechatapp/NewChat.dart';
 import 'package:realtimechatapp/state/user/UserCubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -44,11 +45,11 @@ class _GroupUiState extends State<GroupUi> {
                 .collection("groups")
                 .doc(widget.e.get("id"))
                 .collection("messages")
-                .where("seen",
-                    whereNotIn: [context.read<UserCubit>().state!.id])
-                .where("recieverId",
+                .where("reciverId",
                     arrayContains: context.read<UserCubit>().state!.id)
-                .snapshots(),
+                .where("seen", whereNotIn: [
+              context.read<UserCubit>().state!.id
+            ]).snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 log(snapshot.error.toString(), name: "group ui error");
@@ -58,7 +59,7 @@ class _GroupUiState extends State<GroupUi> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => NewChat(
+                            builder: (context) => GroupChat(
                                   id: chat!.id,
                                   userUi: false,
                                   chatLastMessage: chat!.lastMessage,
