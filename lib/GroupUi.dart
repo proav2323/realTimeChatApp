@@ -47,13 +47,27 @@ class _GroupUiState extends State<GroupUi> {
                 .collection("messages")
                 .where("reciverId",
                     arrayContains: context.read<UserCubit>().state!.id)
-                .where("seen", whereNotIn: [
-              context.read<UserCubit>().state!.id
-            ]).snapshots(),
+                .snapshots(),
             builder: (context, snapshot) {
               if (snapshot.hasError) {
                 log(snapshot.error.toString(), name: "group ui error");
               }
+
+              List<dynamic> data = [];
+              if (snapshot.hasData) {
+                List<dynamic> dat = snapshot.data!.docs;
+                data = dat.where((value) {
+                  log(value.get("seen").toString(), name: "hroup ui");
+                  if (!value
+                      .get("seen")
+                      .contains(context.read<UserCubit>().state!.id)) {
+                    return true;
+                  } else {
+                    return false;
+                  }
+                }).toList();
+              }
+
               return GestureDetector(
                   onTap: () {
                     Navigator.push(
@@ -98,8 +112,7 @@ class _GroupUiState extends State<GroupUi> {
                                 : const SizedBox()
                           ],
                         )),
-                        snapshot.hasData == true &&
-                                snapshot.data!.docs.length >= 1
+                        snapshot.hasData == true && data.length >= 1
                             ? Container(
                                 width: 20,
                                 height: 20,
@@ -107,9 +120,8 @@ class _GroupUiState extends State<GroupUi> {
                                     color: Colors.red,
                                     borderRadius: BorderRadius.circular(24)),
                                 margin: EdgeInsets.only(right: 5),
-                                child: Center(
-                                    child: Text(
-                                        snapshot.data!.docs.length.toString())),
+                                child:
+                                    Center(child: Text(data.length.toString())),
                               )
                             : const SizedBox()
                       ],
