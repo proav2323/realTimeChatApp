@@ -133,4 +133,12 @@ class GroupDb {
 
     return true;
   }
+
+  Future<bool> addMember(String memberId, String groupId) async {
+    await db.collection("groups").doc(groupId).update({
+      "members": FieldValue.arrayUnion([memberId])
+    });
+
+    return true;
+  }
 }

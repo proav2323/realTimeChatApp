@@ -166,7 +166,8 @@ class _GroupChatState extends State<GroupChat> {
                     onPressed: () => Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (context) => GroupMembers(group: chat!))),
+                            builder: (context) =>
+                                GroupMembers(group: chat!, id: chat!.id))),
                     icon: const Icon(Icons.group)),
                 CustomPopumMenu(fun: selected, data: const [
                   PopupMenuItem(
