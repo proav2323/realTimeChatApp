@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realtimechatapp/ChatMessage.dart';
 import 'package:realtimechatapp/Group.dart';
 import 'package:realtimechatapp/GroupDb.dart';
+import 'package:realtimechatapp/GroupMembers.dart';
 import 'package:realtimechatapp/GroupMessageUi.dart';
 import 'package:realtimechatapp/Input.dart';
 import 'package:realtimechatapp/PopumMenu.dart';
@@ -161,7 +162,12 @@ class _GroupChatState extends State<GroupChat> {
                 style: const TextStyle(fontSize: 16),
               ),
               actions: [
-                IconButton(onPressed: () {}, icon: const Icon(Icons.group)),
+                IconButton(
+                    onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => GroupMembers(group: chat!))),
+                    icon: const Icon(Icons.group)),
                 CustomPopumMenu(fun: selected, data: const [
                   PopupMenuItem(
                     value: "block",

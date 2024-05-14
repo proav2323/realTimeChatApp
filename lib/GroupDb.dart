@@ -125,4 +125,12 @@ class GroupDb {
 
     return true;
   }
+
+  Future<bool> removeMember(String memberId, String groupId) async {
+    await db.collection("groups").doc(groupId).update({
+      "members": FieldValue.arrayRemove([memberId])
+    });
+
+    return true;
+  }
 }
