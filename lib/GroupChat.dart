@@ -4,12 +4,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realtimechatapp/ChatMessage.dart';
+import 'package:realtimechatapp/EditDailog.dart';
+import 'package:realtimechatapp/EditGroupDialog.dart';
 import 'package:realtimechatapp/Group.dart';
 import 'package:realtimechatapp/GroupDb.dart';
 import 'package:realtimechatapp/GroupMembers.dart';
 import 'package:realtimechatapp/GroupMessageUi.dart';
 import 'package:realtimechatapp/Input.dart';
 import 'package:realtimechatapp/PopumMenu.dart';
+import 'package:realtimechatapp/pages/Home.dart';
 import 'package:realtimechatapp/state/user/UserCubit.dart';
 
 class GroupChat extends StatefulWidget {
@@ -149,7 +152,59 @@ class _GroupChatState extends State<GroupChat> {
     }
   }
 
-  void selected(String data) {}
+  void selected(String data) {
+    if (data == "delete") {
+      GroupDb().deleteGroup(chat!.id).then((value) {
+        if (value == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("you have deleted the group")));
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const MyHomePage(
+                        loginTry: false,
+                      )),
+              (route) => false);
+        }
+      });
+    } else if (data == "leave") {
+      GroupDb()
+          .removeMember(context.read<UserCubit>().state!.id, chat!.id)
+          .then((value) {
+        if (value == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("you have left the group")));
+          Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(
+                  builder: (BuildContext context) => const MyHomePage(
+                        loginTry: false,
+                      )),
+              (route) => false);
+        }
+      });
+    } else if (data == "edit") {
+      showDialog(
+          context: context,
+          builder: (BuildContext context) => Dialog(
+              child: EdutGroup(
+                  chatId: chat!.id,
+                  prevName: chat!.name,
+                  callBack: () {
+                    FirebaseFirestore.instance
+                        .collection("groups")
+                        .doc(chat!.id)
+                        .get()
+                        .then((value) {
+                      GroupDb().getChat(value).then((value) {
+                        setState(() {
+                          chat = value;
+                        });
+                      });
+                    });
+                  })));
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -169,8 +224,8 @@ class _GroupChatState extends State<GroupChat> {
                             builder: (context) =>
                                 GroupMembers(group: chat!, id: chat!.id))),
                     icon: const Icon(Icons.group)),
-                CustomPopumMenu(fun: selected, data: const [
-                  PopupMenuItem(
+                CustomPopumMenu(fun: selected, data: [
+                  const PopupMenuItem(
                     value: "block",
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.start,
@@ -182,7 +237,54 @@ class _GroupChatState extends State<GroupChat> {
                         Text("Block"),
                       ],
                     ),
-                  )
+                  ),
+                  chat!.createdBy == context.read<UserCubit>().state!.id
+                      ? const PopupMenuItem(
+                          value: "edit",
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Icon(Icons.block),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                "Edit Name",
+                              ),
+                            ],
+                          ))
+                      : const PopupMenuItem(child: SizedBox()),
+                  chat!.createdBy == context.read<UserCubit>().state!.id
+                      ? const PopupMenuItem(
+                          value: "delete",
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Icon(Icons.block),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                "Delete Group",
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ],
+                          ))
+                      : const PopupMenuItem(
+                          value: "leave",
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Icon(Icons.block),
+                              SizedBox(
+                                width: 5,
+                              ),
+                              Text(
+                                "Leave Group",
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ],
+                          )),
                 ])
               ],
             )

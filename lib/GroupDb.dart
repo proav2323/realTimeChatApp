@@ -141,4 +141,16 @@ class GroupDb {
 
     return true;
   }
+
+  Future<bool> deleteGroup(String chatId) async {
+    await db.collection("groups").doc(chatId).delete();
+
+    return true;
+  }
+
+  Future<bool> editGroup(String chatId, String name) async {
+    await db.collection("groups").doc(chatId).update({"name": name});
+
+    return true;
+  }
 }
