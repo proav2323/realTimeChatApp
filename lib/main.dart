@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:realtimechatapp/Messaging.dart';
 import 'package:realtimechatapp/state/Chat/ChatCubit.dart';
 import 'package:realtimechatapp/state/user/UserCubit.dart';
 import 'package:realtimechatapp/state/UserObserver.dart';
@@ -13,6 +14,7 @@ Future<void> main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
   Bloc.observer = const StateObserver();
+  await Messaging().init();
   runApp(const MyApp());
 }
 
