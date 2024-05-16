@@ -33,6 +33,8 @@ class Messaging {
   }
 
   updateToken(String userId) async {
-    await db.collection("users").doc(userId).update({"token": fcmToken ?? ""});
+    await db.collection("users").doc(userId).update({
+      "token": FieldValue.arrayUnion([fcmToken ?? ""])
+    });
   }
 }
