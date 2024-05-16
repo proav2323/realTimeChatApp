@@ -2,6 +2,7 @@ import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
 class Messaging {
   NotificationSettings? notificationSettings;
@@ -36,5 +37,18 @@ class Messaging {
     await db.collection("users").doc(userId).update({
       "token": FieldValue.arrayUnion([fcmToken ?? ""])
     });
+  }
+
+  Future<bool> SendPushNotification(
+      String reciverId, String senderId, String message) async {
+    await http.post(
+        Uri.parse("https://realtimechatappbackend-p1b7.onrender.com/send"),
+        body: {
+          "reciverId": reciverId,
+          "senderId": senderId,
+          "message": message,
+        });
+
+    return true;
   }
 }
