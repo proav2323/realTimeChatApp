@@ -13,6 +13,7 @@ import 'package:realtimechatapp/ChatDb.dart';
 import 'package:realtimechatapp/ChatUi.dart';
 import 'package:realtimechatapp/GroupUi.dart';
 import 'package:realtimechatapp/Input.dart';
+import 'package:realtimechatapp/Messaging.dart';
 import 'package:realtimechatapp/PopumMenu.dart';
 import 'package:realtimechatapp/SeachInput.dart';
 import 'package:realtimechatapp/SearchPage.dart';
@@ -95,6 +96,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     if (auth.currentUser != null || context.read<UserCubit>().state != null) {
       setupInteractedMessage();
+      Messaging().updateToken(auth.currentUser!.uid);
       getChats();
       if (context.read<UserCubit>().state == null) {
         Auth authC = Auth(callback: authCallBack);
