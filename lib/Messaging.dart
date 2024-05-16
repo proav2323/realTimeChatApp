@@ -29,7 +29,7 @@ class Messaging {
       log(fcmToken, name: "token");
     }).onError((err) {});
 
-    await FirebaseMessaging.instance.subscribeToTopic(fcmToken ?? "");
+    FirebaseMessaging.onMessage.listen((RemoteMessage mes) {});
   }
 
   updateToken(String userId) async {
