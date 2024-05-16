@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:realtimechatapp/Messaging.dart';
 import 'package:realtimechatapp/User.dart' as us;
 
 class Auth {
@@ -39,8 +40,12 @@ class Auth {
           .createUserWithEmailAndPassword(email: email, password: password);
 
       if (credential.user != null) {
-        us.User user =
-            await createUser(email, credential.user!.uid, name, "", "");
+        us.User user = await createUser(
+          email,
+          credential.user!.uid,
+          name,
+          "",
+        );
         return {"user": user, "error": ""};
       } else {
         return {"error": "soemthign went wrong"};
@@ -67,20 +72,20 @@ class Auth {
       name: data.get("name"),
       id: data.get("id"),
       email: data.get("email"),
-      socketId: data.get("socketId"),
+      token: data.get("token"),
       online: data.get("online"),
       profileImg: data.get("profileImg") ?? null,
     );
     return newUser;
   }
 
-  Future<us.User> createUser(String email, String id, String name,
-      String socketId, String profileImg) async {
+  Future<us.User> createUser(
+      String email, String id, String name, String profileImg) async {
     await db.collection("users").doc(id).set({
       "email": email,
       "id": id,
       "name": name,
-      "socketId": socketId,
+      "token": Messaging().fcmToken ?? "",
       "profileImg": profileImg,
       "online": true,
     });

@@ -2,7 +2,7 @@ class User {
   String name;
   String id;
   String email;
-  String socketId;
+  String token;
   String? profileImg;
   bool online;
 
@@ -10,7 +10,7 @@ class User {
     required this.name,
     required this.id,
     required this.email,
-    required this.socketId,
+    required this.token,
     required this.online,
     this.profileImg = null,
   });

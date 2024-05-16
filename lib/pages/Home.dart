@@ -1,6 +1,5 @@
 import 'dart:developer';
 import 'dart:math' as ma;
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
@@ -17,7 +16,6 @@ import 'package:realtimechatapp/Input.dart';
 import 'package:realtimechatapp/PopumMenu.dart';
 import 'package:realtimechatapp/SeachInput.dart';
 import 'package:realtimechatapp/SearchPage.dart';
-import 'package:realtimechatapp/Socket.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:realtimechatapp/UpdateProfile.dart';
 import 'package:realtimechatapp/User.dart' as Us;
@@ -105,10 +103,6 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
           context.read<UserCubit>().login(user);
         });
       }
-      Socket socket = Socket(callabck: callBack);
-      socket.init();
-      connected = socket.getConnected();
-      loading = socket.getLoading();
       setState(() {
         chatLoading = true;
       });
@@ -176,14 +170,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         state == AppLifecycleState.inactive ||
         state == AppLifecycleState.detached) {
       log("loll", name: "detached");
-      Socket.socket.disconnect();
     } else if (state == AppLifecycleState.resumed) {
-      Socket socket = Socket(callabck: callBack);
-      socket.init();
       getChats();
     } else if (state == AppLifecycleState.hidden) {
-      Socket socket = Socket(callabck: callBack);
-      socket.init();
       getChats();
     }
   }

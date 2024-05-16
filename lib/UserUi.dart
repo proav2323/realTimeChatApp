@@ -21,7 +21,7 @@ class _UserUiState extends State<UserUi> {
         name: widget.e.get("name"),
         id: widget.e.get("id"),
         email: widget.e.get("email"),
-        socketId: widget.e.get("socketId"),
+        token: widget.e.get("token"),
         online: widget.e.get("online"),
         profileImg: widget.e.get("profileImg"),
       );
