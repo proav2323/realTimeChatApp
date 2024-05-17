@@ -1,5 +1,6 @@
 import 'dart:developer';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
@@ -7,7 +8,7 @@ import 'package:http/http.dart' as http;
 class Messaging {
   NotificationSettings? notificationSettings;
   String? apnsToken;
-  String? fcmToken;
+  String? fcmTokenn;
   FirebaseFirestore db = FirebaseFirestore.instance;
 
   Future<void> init() async {
@@ -20,21 +21,28 @@ class Messaging {
       provisional: false,
       sound: true,
     );
-    apnsToken = await FirebaseMessaging.instance.getAPNSToken();
-    fcmToken = await FirebaseMessaging.instance.getToken(
-        vapidKey:
-            "BMSimRkGSeh7eCnChGl37uz1g7EbSQvkaG9trfoIsHCirxN1jrDa6wkZyXnuZKcBNyv0Py1OCysjU0X2p2sHF3Q");
-    await Clipboard.setData(ClipboardData(text: fcmToken ?? ""));
-
     FirebaseMessaging.instance.onTokenRefresh.listen((fcmToken) {
       log(fcmToken, name: "token");
+      if (FirebaseAuth.instance.currentUser != null) {
+        updateToken(FirebaseAuth.instance.currentUser!.uid, fcmToken);
+      }
     }).onError((err) {});
+    apnsToken = await FirebaseMessaging.instance.getAPNSToken();
+    fcmTokenn = await FirebaseMessaging.instance.getToken(
+        vapidKey:
+            "BMSimRkGSeh7eCnChGl37uz1g7EbSQvkaG9trfoIsHCirxN1jrDa6wkZyXnuZKcBNyv0Py1OCysjU0X2p2sHF3Q");
+
+    if (FirebaseAuth.instance.currentUser != null) {
+      updateToken(FirebaseAuth.instance.currentUser!.uid,
+          fcmTokenn ?? "no token bsdjsb");
+      log("fkdfknsfjn", name: "lol");
+    } else {}
 
     FirebaseMessaging.onMessage.listen((RemoteMessage mes) {});
   }
 
-  updateToken(String userId) async {
-    await db.collection("users").doc(userId).update({"token": fcmToken ?? ""});
+  updateToken(String userId, String token) async {
+    await db.collection("users").doc(userId).update({"token": token});
   }
 
   Future<bool> SendPushNotification(

@@ -8,6 +8,7 @@ import 'package:realtimechatapp/Chat.dart';
 import 'package:realtimechatapp/ChatDb.dart';
 import 'package:realtimechatapp/ChatMessage.dart';
 import 'package:realtimechatapp/Input.dart';
+import 'package:realtimechatapp/Messaging.dart';
 import 'package:realtimechatapp/PopumMenu.dart';
 import 'package:realtimechatapp/User.dart';
 import 'package:realtimechatapp/state/user/UserCubit.dart';
@@ -139,12 +140,19 @@ class _NewChatState extends State<NewChat> {
               search.text, context.read<UserCubit>().state!.id, user!.id)
           .then((value) {
         if (value == true) {
-          search.clear();
           if (_scrollController.hasClients) {
             _scrollToBottom();
           }
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text("message send")));
+          Messaging()
+              .SendPushNotification(
+                  user!.id, context.read<UserCubit>().state!.id, search.text)
+              .then((value) {
+            if (value) {
+              search.clear();
+              ScaffoldMessenger.of(context)
+                  .showSnackBar(const SnackBar(content: Text("message send")));
+            }
+          });
         }
       });
     }

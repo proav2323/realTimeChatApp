@@ -96,7 +96,8 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     WidgetsBinding.instance.addObserver(this);
     if (auth.currentUser != null || context.read<UserCubit>().state != null) {
       setupInteractedMessage();
-      Messaging().updateToken(auth.currentUser!.uid);
+      // Messaging().updateToken(
+      //     auth.currentUser!.uid, Messaging().fcmTokenn ?? "no token");
       getChats();
       if (context.read<UserCubit>().state == null) {
         Auth authC = Auth(callback: authCallBack);
@@ -140,6 +141,9 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               context,
               MaterialPageRoute(builder: (context) => Login()),
               (Route<dynamic> route) => false);
+        } else {
+          Messaging().updateToken(
+              auth.currentUser!.uid, Messaging().fcmTokenn ?? "no token");
         }
       });
     } else {
@@ -150,7 +154,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               context,
               MaterialPageRoute(builder: (context) => Login()),
               (Route<dynamic> route) => false);
-        }
+        } else {}
       });
     }
   }
@@ -240,411 +244,422 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<ChatCubit, List<Chat>?>(
-        builder: (context, chatState) => BlocBuilder<UserCubit, Us.User?>(
-            builder: (context, state) => Scaffold(
-                appBar: AppBar(
-                  title: Text("Chatty"),
-                  actions: state != null
-                      ? [
-                          state.profileImg != ""
-                              ? CustomPopumMenu(
-                                  icon: SizedBox(
-                                      width: 40,
-                                      height: 40,
-                                      child: CircleAvatar(
-                                        radius: 48,
-                                        backgroundImage:
-                                            NetworkImage(state.profileImg!),
-                                      )),
-                                  fun: selectedUpadte,
-                                  data: const [
-                                    PopupMenuItem(
-                                      value: "update",
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Icon(Icons.edit),
-                                          SizedBox(
-                                            width: 5,
-                                          ),
-                                          Text("Update Profile"),
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuItem(
-                                      value: "settings",
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Icon(Icons.settings),
-                                          SizedBox(
-                                            width: 5,
-                                          ),
-                                          Text("Settings"),
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuItem(
-                                      value: "logout",
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Icon(Icons.logout),
-                                          SizedBox(
-                                            width: 5,
-                                          ),
-                                          Text("Logout"),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                )
-                              : CustomPopumMenu(
-                                  icon: Icon(Icons.account_circle),
-                                  fun: selectedUpadte,
-                                  data: const [
-                                    PopupMenuItem(
-                                      value: "update",
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Icon(Icons.edit),
-                                          SizedBox(
-                                            width: 5,
-                                          ),
-                                          Text("Update Profile"),
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuItem(
-                                      value: "settings",
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Icon(Icons.settings),
-                                          SizedBox(
-                                            width: 5,
-                                          ),
-                                          Text("Settings"),
-                                        ],
-                                      ),
-                                    ),
-                                    PopupMenuItem(
-                                      value: "logout",
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: [
-                                          Icon(Icons.logout),
-                                          SizedBox(
-                                            width: 5,
-                                          ),
-                                          Text("Logout"),
-                                        ],
-                                      ),
-                                    ),
-                                  ],
-                                )
-                        ]
-                      : [],
-                  bottom: PreferredSize(
-                      preferredSize:
-                          Size(MediaQuery.of(context).size.width, 70),
-                      child: Container(
-                        width: double.infinity,
-                        margin: const EdgeInsets.all(8),
-                        child: SizedBox(
-                            width: double.infinity,
-                            child: SearchInput(
-                              controller: search,
-                              title: "Search",
-                              padding: EdgeInsets.symmetric(
-                                  vertical: 0, horizontal: 2),
-                              error: "",
-                              validate: (String val) {},
-                              gradiantColors: const [],
-                              submit: (String val) {
-                                if (val != "") {
-                                  Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                          builder: (context) =>
-                                              SearchPage(search: val)));
-                                }
-                              },
-                            )),
-                      )),
-                ),
-                floatingActionButton: state != null
-                    ? FloatingActionButton(
-                        onPressed: () => showDialog(
-                          context: context,
-                          builder: (BuildContext context) =>
-                              const Dialog.fullscreen(
-                            child: AddGroup(),
-                          ),
-                        ),
-                        child: const Icon(Icons.add),
-                      )
-                    : const SizedBox(),
-                body: SingleChildScrollView(
-                    child: Column(
-                  mainAxisSize: MainAxisSize.max,
-                  children: [
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    StreamBuilder(
-                        stream: FirebaseFirestore.instance
-                            .collection("groups")
-                            .where("members",
-                                arrayContains: auth.currentUser!.uid)
-                            .orderBy("lastMessageAt", descending: true)
-                            .snapshots(),
-                        builder: (context, snap) {
-                          if (snap.hasError) {
-                            log(snap.error.toString(), name: "error");
-                            return Text(snap.error.toString());
-                          }
-
-                          if (snap.connectionState == ConnectionState.waiting) {
-                            return const CircularProgressIndicator();
-                          }
-
-                          if (snap.data == null || snap.data!.size == 0) {
-                            return const SizedBox();
-                          }
-
-                          return Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Container(
-                                  padding: const EdgeInsets.only(left: 4),
-                                  child: const Text(
-                                    "Groups You In",
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.w900,
-                                    ),
-                                  )),
-                              Container(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 8, horizontal: 4),
-                                  width: MediaQuery.of(context).size.width,
-                                  child: ListView(
-                                    shrinkWrap: true,
-                                    children: snap.data == null
-                                        ? const [SizedBox()]
-                                        : snap.data!.docs
-                                            .map((e) {
-                                              return GroupUi(
-                                                key: Key(
-                                                    "${ma.Random().nextDouble()}"),
-                                                e: e,
-                                              );
-                                            })
-                                            .toList()
-                                            .cast(),
-                                  )),
-                            ],
-                          );
-                        }),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    StreamBuilder(
-                      stream: FirebaseFirestore.instance
-                          .collection('users')
-                          .doc(auth.currentUser!.uid)
-                          .collection("chats")
-                          .orderBy("lastMessageAt", descending: true)
-                          .snapshots(),
-                      builder: (BuildContext context,
-                          AsyncSnapshot<QuerySnapshot> snapshot) {
-                        if (snapshot.hasError) {
-                          return const Text('Something went wrong');
-                        }
-
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return const Center(
-                              child: CircularProgressIndicator());
-                        }
-
-                        if (snapshot.data == null || snapshot.data!.size == 0) {
-                          return Column(
-                            children: [
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              StreamBuilder(
-                                stream: FirebaseFirestore.instance
-                                    .collection("users")
-                                    .where("id", whereNotIn: [
-                                  auth.currentUser!.uid
-                                ]).snapshots(),
-                                builder: (BuildContext context,
-                                    AsyncSnapshot<QuerySnapshot> snapshott) {
-                                  if (snapshott.hasError) {
-                                    return const Text('Something went wrong');
-                                  }
-
-                                  if (snapshott.connectionState ==
-                                      ConnectionState.waiting) {
-                                    return const Center(
-                                        child: CircularProgressIndicator());
-                                  }
-
-                                  if (snapshott.data == null ||
-                                      snapshott.data!.size == 0) {
-                                    return const SizedBox();
-                                  }
-                                  return Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Container(
-                                          padding:
-                                              const EdgeInsets.only(left: 4),
-                                          child: const Text(
-                                            "Other Users",
-                                            style: TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.w900,
-                                            ),
+    return auth.currentUser != null && context.read<UserCubit>().state != null
+        ? BlocBuilder<ChatCubit, List<Chat>?>(
+            builder: (context, chatState) => BlocBuilder<UserCubit, Us.User?>(
+                builder: (context, state) => Scaffold(
+                    appBar: AppBar(
+                      title: Text("Chatty"),
+                      actions: state != null
+                          ? [
+                              state.profileImg != ""
+                                  ? CustomPopumMenu(
+                                      icon: SizedBox(
+                                          width: 40,
+                                          height: 40,
+                                          child: CircleAvatar(
+                                            radius: 48,
+                                            backgroundImage:
+                                                NetworkImage(state.profileImg!),
                                           )),
-                                      Container(
-                                          padding: EdgeInsets.symmetric(
-                                              vertical: 8, horizontal: 4),
-                                          width:
-                                              MediaQuery.of(context).size.width,
-                                          child: ListView(
-                                            shrinkWrap: true,
-                                            children: snapshott.data == null
-                                                ? const [SizedBox()]
-                                                : snapshott.data!.docs
-                                                    .map((e) {
-                                                      return UserUi(
+                                      fun: selectedUpadte,
+                                      data: const [
+                                        PopupMenuItem(
+                                          value: "update",
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Icon(Icons.edit),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text("Update Profile"),
+                                            ],
+                                          ),
+                                        ),
+                                        PopupMenuItem(
+                                          value: "settings",
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Icon(Icons.settings),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text("Settings"),
+                                            ],
+                                          ),
+                                        ),
+                                        PopupMenuItem(
+                                          value: "logout",
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Icon(Icons.logout),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text("Logout"),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                                  : CustomPopumMenu(
+                                      icon: Icon(Icons.account_circle),
+                                      fun: selectedUpadte,
+                                      data: const [
+                                        PopupMenuItem(
+                                          value: "update",
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Icon(Icons.edit),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text("Update Profile"),
+                                            ],
+                                          ),
+                                        ),
+                                        PopupMenuItem(
+                                          value: "settings",
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Icon(Icons.settings),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text("Settings"),
+                                            ],
+                                          ),
+                                        ),
+                                        PopupMenuItem(
+                                          value: "logout",
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              Icon(Icons.logout),
+                                              SizedBox(
+                                                width: 5,
+                                              ),
+                                              Text("Logout"),
+                                            ],
+                                          ),
+                                        ),
+                                      ],
+                                    )
+                            ]
+                          : [],
+                      bottom: PreferredSize(
+                          preferredSize:
+                              Size(MediaQuery.of(context).size.width, 70),
+                          child: Container(
+                            width: double.infinity,
+                            margin: const EdgeInsets.all(8),
+                            child: SizedBox(
+                                width: double.infinity,
+                                child: SearchInput(
+                                  controller: search,
+                                  title: "Search",
+                                  padding: EdgeInsets.symmetric(
+                                      vertical: 0, horizontal: 2),
+                                  error: "",
+                                  validate: (String val) {},
+                                  gradiantColors: const [],
+                                  submit: (String val) {
+                                    if (val != "") {
+                                      Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                              builder: (context) =>
+                                                  SearchPage(search: val)));
+                                    }
+                                  },
+                                )),
+                          )),
+                    ),
+                    floatingActionButton: state != null
+                        ? FloatingActionButton(
+                            onPressed: () => showDialog(
+                              context: context,
+                              builder: (BuildContext context) =>
+                                  const Dialog.fullscreen(
+                                child: AddGroup(),
+                              ),
+                            ),
+                            child: const Icon(Icons.add),
+                          )
+                        : const SizedBox(),
+                    body: SingleChildScrollView(
+                        child: Column(
+                      mainAxisSize: MainAxisSize.max,
+                      children: [
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        StreamBuilder(
+                            stream: FirebaseFirestore.instance
+                                .collection("groups")
+                                .where("members",
+                                    arrayContains: auth.currentUser!.uid)
+                                .orderBy("lastMessageAt", descending: true)
+                                .snapshots(),
+                            builder: (context, snap) {
+                              if (snap.hasError) {
+                                log(snap.error.toString(), name: "error");
+                                return Text(snap.error.toString());
+                              }
+
+                              if (snap.connectionState ==
+                                  ConnectionState.waiting) {
+                                return const CircularProgressIndicator();
+                              }
+
+                              if (snap.data == null || snap.data!.size == 0) {
+                                return const SizedBox();
+                              }
+
+                              return Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Container(
+                                      padding: const EdgeInsets.only(left: 4),
+                                      child: const Text(
+                                        "Groups You In",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w900,
+                                        ),
+                                      )),
+                                  Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8, horizontal: 4),
+                                      width: MediaQuery.of(context).size.width,
+                                      child: ListView(
+                                        shrinkWrap: true,
+                                        children: snap.data == null
+                                            ? const [SizedBox()]
+                                            : snap.data!.docs
+                                                .map((e) {
+                                                  return GroupUi(
+                                                    key: Key(
+                                                        "${ma.Random().nextDouble()}"),
+                                                    e: e,
+                                                  );
+                                                })
+                                                .toList()
+                                                .cast(),
+                                      )),
+                                ],
+                              );
+                            }),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        StreamBuilder(
+                          stream: FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(auth.currentUser!.uid)
+                              .collection("chats")
+                              .orderBy("lastMessageAt", descending: true)
+                              .snapshots(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<QuerySnapshot> snapshot) {
+                            if (snapshot.hasError) {
+                              return const Text('Something went wrong');
+                            }
+
+                            if (snapshot.connectionState ==
+                                ConnectionState.waiting) {
+                              return const Center(
+                                  child: CircularProgressIndicator());
+                            }
+
+                            if (snapshot.data == null ||
+                                snapshot.data!.size == 0) {
+                              return Column(
+                                children: [
+                                  const SizedBox(
+                                    height: 10,
+                                  ),
+                                  StreamBuilder(
+                                    stream: FirebaseFirestore.instance
+                                        .collection("users")
+                                        .where("id", whereNotIn: [
+                                      auth.currentUser!.uid
+                                    ]).snapshots(),
+                                    builder: (BuildContext context,
+                                        AsyncSnapshot<QuerySnapshot>
+                                            snapshott) {
+                                      if (snapshott.hasError) {
+                                        return const Text(
+                                            'Something went wrong');
+                                      }
+
+                                      if (snapshott.connectionState ==
+                                          ConnectionState.waiting) {
+                                        return const Center(
+                                            child: CircularProgressIndicator());
+                                      }
+
+                                      if (snapshott.data == null ||
+                                          snapshott.data!.size == 0) {
+                                        return const SizedBox();
+                                      }
+                                      return Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Container(
+                                              padding: const EdgeInsets.only(
+                                                  left: 4),
+                                              child: const Text(
+                                                "Other Users",
+                                                style: TextStyle(
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.w900,
+                                                ),
+                                              )),
+                                          Container(
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 8, horizontal: 4),
+                                              width: MediaQuery.of(context)
+                                                  .size
+                                                  .width,
+                                              child: ListView(
+                                                shrinkWrap: true,
+                                                children: snapshott.data == null
+                                                    ? const [SizedBox()]
+                                                    : snapshott.data!.docs
+                                                        .map((e) {
+                                                          return UserUi(
+                                                              e: e,
+                                                              key: Key(
+                                                                  "${ma.Random().nextDouble()}"));
+                                                        })
+                                                        .toList()
+                                                        .cast(),
+                                              )),
+                                        ],
+                                      );
+                                    },
+                                  ),
+                                ],
+                              );
+                            }
+                            return Column(
+                              children: [
+                                Container(
+                                    padding: const EdgeInsets.only(left: 4),
+                                    child: const Text(
+                                      "your chats",
+                                      style: TextStyle(
+                                        fontSize: 22,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    )),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                Container(
+                                    padding: EdgeInsets.symmetric(
+                                        vertical: 8, horizontal: 4),
+                                    width: MediaQuery.of(context).size.width,
+                                    child: ListView(
+                                      shrinkWrap: true,
+                                      children: snapshot.data == null
+                                          ? [const SizedBox()]
+                                          : snapshot.data!.docs
+                                              .map((e) {
+                                                return ChatUi(
+                                                  key: Key(
+                                                      "${ma.Random().nextDouble()}"),
+                                                  e: e,
+                                                );
+                                              })
+                                              .toList()
+                                              .cast(),
+                                    )),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                StreamBuilder(
+                                  stream: FirebaseFirestore.instance
+                                      .collection("users")
+                                      .where("id", whereNotIn: [
+                                    ...snapshot.data!.docs
+                                        .map((e) => e.get("id")),
+                                    auth.currentUser!.uid
+                                  ]).snapshots(),
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<QuerySnapshot> snapshott) {
+                                    if (snapshott.hasError) {
+                                      return const Text('Something went wrong');
+                                    }
+
+                                    if (snapshott.connectionState ==
+                                        ConnectionState.waiting) {
+                                      return const Center(
+                                          child: CircularProgressIndicator());
+                                    }
+
+                                    if (snapshott.data == null ||
+                                        snapshott.data!.size == 0) {
+                                      return const SizedBox();
+                                    }
+                                    return Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Container(
+                                            padding:
+                                                const EdgeInsets.only(left: 4),
+                                            child: const Text(
+                                              "Other Users",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.w900,
+                                              ),
+                                            )),
+                                        Container(
+                                            padding: EdgeInsets.symmetric(
+                                                vertical: 8, horizontal: 4),
+                                            width: MediaQuery.of(context)
+                                                .size
+                                                .width,
+                                            child: ListView(
+                                              shrinkWrap: true,
+                                              children: snapshott.data == null
+                                                  ? const [SizedBox()]
+                                                  : snapshott.data!.docs
+                                                      .map((e) {
+                                                        return UserUi(
                                                           e: e,
                                                           key: Key(
-                                                              "${ma.Random().nextDouble()}"));
-                                                    })
-                                                    .toList()
-                                                    .cast(),
-                                          )),
-                                    ],
-                                  );
-                                },
-                              ),
-                            ],
-                          );
-                        }
-                        return Column(
-                          children: [
-                            Container(
-                                padding: const EdgeInsets.only(left: 4),
-                                child: const Text(
-                                  "your chats",
-                                  style: TextStyle(
-                                    fontSize: 22,
-                                    fontWeight: FontWeight.w900,
-                                  ),
-                                )),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            Container(
-                                padding: EdgeInsets.symmetric(
-                                    vertical: 8, horizontal: 4),
-                                width: MediaQuery.of(context).size.width,
-                                child: ListView(
-                                  shrinkWrap: true,
-                                  children: snapshot.data == null
-                                      ? [const SizedBox()]
-                                      : snapshot.data!.docs
-                                          .map((e) {
-                                            return ChatUi(
-                                              key: Key(
-                                                  "${ma.Random().nextDouble()}"),
-                                              e: e,
-                                            );
-                                          })
-                                          .toList()
-                                          .cast(),
-                                )),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            StreamBuilder(
-                              stream: FirebaseFirestore.instance
-                                  .collection("users")
-                                  .where("id", whereNotIn: [
-                                ...snapshot.data!.docs.map((e) => e.get("id")),
-                                auth.currentUser!.uid
-                              ]).snapshots(),
-                              builder: (BuildContext context,
-                                  AsyncSnapshot<QuerySnapshot> snapshott) {
-                                if (snapshott.hasError) {
-                                  return const Text('Something went wrong');
-                                }
-
-                                if (snapshott.connectionState ==
-                                    ConnectionState.waiting) {
-                                  return const Center(
-                                      child: CircularProgressIndicator());
-                                }
-
-                                if (snapshott.data == null ||
-                                    snapshott.data!.size == 0) {
-                                  return const SizedBox();
-                                }
-                                return Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Container(
-                                        padding: const EdgeInsets.only(left: 4),
-                                        child: const Text(
-                                          "Other Users",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.w900,
-                                          ),
-                                        )),
-                                    Container(
-                                        padding: EdgeInsets.symmetric(
-                                            vertical: 8, horizontal: 4),
-                                        width:
-                                            MediaQuery.of(context).size.width,
-                                        child: ListView(
-                                          shrinkWrap: true,
-                                          children: snapshott.data == null
-                                              ? const [SizedBox()]
-                                              : snapshott.data!.docs
-                                                  .map((e) {
-                                                    return UserUi(
-                                                      e: e,
-                                                      key: Key(
-                                                          "${ma.Random().nextDouble()}"),
-                                                    );
-                                                  })
-                                                  .toList()
-                                                  .cast(),
-                                        )),
-                                  ],
-                                );
-                              },
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ],
-                )))));
+                                                              "${ma.Random().nextDouble()}"),
+                                                        );
+                                                      })
+                                                      .toList()
+                                                      .cast(),
+                                            )),
+                                      ],
+                                    );
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        ),
+                      ],
+                    )))))
+        : const SizedBox();
   }
 }
