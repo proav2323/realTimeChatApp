@@ -132,14 +132,14 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
     });
 
     if (widget.loginTry) {
-      Future.delayed(Duration(seconds: 3));
+      Future.delayed(const Duration(seconds: 3));
       SchedulerBinding.instance.addPostFrameCallback((timeStamp) {
         if (auth.currentUser == null &&
             context.read<UserCubit>().state == null) {
           log("dslmc", name: "home");
           Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => Login()),
+              MaterialPageRoute(builder: (context) => const Login()),
               (Route<dynamic> route) => false);
         } else {
           Messaging().updateToken(

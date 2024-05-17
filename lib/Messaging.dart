@@ -57,4 +57,17 @@ class Messaging {
 
     return true;
   }
+
+  Future<bool> sendGroupPushNotification(
+      String groupId, String senderId, String message) async {
+    await http.post(
+        Uri.parse("https://realtimechatappbackend-p1b7.onrender.com/sendGroup"),
+        body: {
+          "groupId": groupId,
+          "senderId": senderId,
+          "message": message,
+        });
+
+    return true;
+  }
 }

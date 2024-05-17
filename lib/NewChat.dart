@@ -160,6 +160,45 @@ class _NewChatState extends State<NewChat> {
 
   void selected(String data) {}
 
+  void seen() {
+    if (_scrollController.hasClients) {
+      if (_scrollController.position.pixels <
+          _scrollController.position.maxScrollExtent) {
+        FirebaseFirestore.instance
+            .collection("users")
+            .doc(context.read<UserCubit>().state!.id)
+            .collection("chats")
+            .doc(widget.id)
+            .collection("messages")
+            .where("reciverId", isEqualTo: context.read<UserCubit>().state!.id)
+            .where("seen", isEqualTo: false)
+            .get()
+            .then((value) {
+          value.docs.forEach((element) {
+            FirebaseFirestore.instance
+                .collection("users")
+                .doc(context.read<UserCubit>().state!.id)
+                .collection("chats")
+                .doc(widget.id)
+                .collection("messages")
+                .doc(element.get("id"))
+                .update({"seen": true});
+
+            FirebaseFirestore.instance
+                .collection("users")
+                .doc(widget.id)
+                .collection("chats")
+                .doc(context.read<UserCubit>().state!.id)
+                .collection("messages")
+                .doc(element.get("id"))
+                .update({"seen": true});
+          });
+        });
+        _scrollToBottom();
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -277,7 +316,7 @@ class _NewChatState extends State<NewChat> {
                             snapshot.data!.docs.isEmpty == true) {
                           return const Expanded(child: SizedBox());
                         }
-
+                        seen();
                         return Expanded(
                             child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,

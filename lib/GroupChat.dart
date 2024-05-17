@@ -206,6 +206,34 @@ class _GroupChatState extends State<GroupChat> {
     }
   }
 
+  seen() {
+    if (_scrollController.hasClients &&
+        _scrollController.position.pixels <
+            _scrollController.position.maxScrollExtent) {
+      FirebaseFirestore.instance
+          .collection("groups")
+          .doc(widget.id)
+          .collection("messages")
+          .where("reciverId",
+              arrayContains: context.read<UserCubit>().state!.id)
+          .where("seen", whereNotIn: [context.read<UserCubit>().state!.id])
+          .get()
+          .then((value) {
+            value.docs.forEach((element) {
+              FirebaseFirestore.instance
+                  .collection("groups")
+                  .doc(widget.id)
+                  .collection("messages")
+                  .doc(element.get("id"))
+                  .update({
+                "seen":
+                    FieldValue.arrayUnion([context.read<UserCubit>().state!.id])
+              });
+            });
+          });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -338,7 +366,7 @@ class _GroupChatState extends State<GroupChat> {
                             snapshot.data!.docs.isEmpty == true) {
                           return const Expanded(child: SizedBox());
                         }
-
+                        seen();
                         return Expanded(
                             child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
