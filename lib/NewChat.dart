@@ -143,16 +143,9 @@ class _NewChatState extends State<NewChat> {
           if (_scrollController.hasClients) {
             _scrollToBottom();
           }
-          Messaging()
-              .SendPushNotification(
-                  user!.id, context.read<UserCubit>().state!.id, search.text)
-              .then((value) {
-            if (value) {
-              search.clear();
-              ScaffoldMessenger.of(context)
-                  .showSnackBar(const SnackBar(content: Text("message send")));
-            }
-          });
+          Messaging().SendPushNotification(
+              user!.id, context.read<UserCubit>().state!.id, search.text);
+          search.clear();
         }
       });
     }

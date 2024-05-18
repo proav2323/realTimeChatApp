@@ -14,6 +14,7 @@ import 'package:realtimechatapp/ChatUi.dart';
 import 'package:realtimechatapp/GroupUi.dart';
 import 'package:realtimechatapp/Input.dart';
 import 'package:realtimechatapp/Messaging.dart';
+import 'package:realtimechatapp/NewChat.dart';
 import 'package:realtimechatapp/PopumMenu.dart';
 import 'package:realtimechatapp/SeachInput.dart';
 import 'package:realtimechatapp/SearchPage.dart';
@@ -87,14 +88,20 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
   }
 
   void _handleMessage(RemoteMessage message) {
-    if (message.data['type'] == 'chat') {}
+    if (message.data['type'] == 'chat') {
+      if (auth.currentUser != null) {
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) =>
+                NewChat(id: message.data['senderId'], userUi: false)));
+      }
+    }
   }
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    if (auth.currentUser != null || context.read<UserCubit>().state != null) {
+    if (auth.currentUser != null) {
       setupInteractedMessage();
       // Messaging().updateToken(
       //     auth.currentUser!.uid, Messaging().fcmTokenn ?? "no token");

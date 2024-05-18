@@ -2,7 +2,7 @@ class User {
   String name;
   String id;
   String email;
-  String token;
+  List<dynamic> token;
   String? profileImg;
   bool online;
 

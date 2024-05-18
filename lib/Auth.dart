@@ -85,7 +85,7 @@ class Auth {
       "email": email,
       "id": id,
       "name": name,
-      "token": Messaging().fcmTokenn ?? "",
+      "token": [Messaging().fcmTokenn ?? ""],
       "profileImg": profileImg,
       "online": true,
     });
