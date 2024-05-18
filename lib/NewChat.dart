@@ -1,4 +1,5 @@
-import 'dart:math';
+import 'dart:math' as math;
+import 'dart:developer';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -155,6 +156,7 @@ class _NewChatState extends State<NewChat> {
 
   void seen() {
     if (_scrollController.hasClients) {
+      log("does it run", name: "chekc");
       if (_scrollController.position.pixels <
           _scrollController.position.maxScrollExtent) {
         FirebaseFirestore.instance
@@ -332,13 +334,14 @@ class _NewChatState extends State<NewChat> {
                                     : snapshot.data!.docs
                                         .map((e) {
                                           return ChatMessage(
+                                            scrollController: _scrollController,
                                             message: e,
                                             chatId: user!.id,
                                             prevMessage: widget.userUi
                                                 ? ""
                                                 : widget.chatLastMessage!,
-                                            key:
-                                                Key("${Random().nextDouble()}"),
+                                            key: Key(
+                                                "${math.Random().nextDouble()}"),
                                           );
                                         })
                                         .toList()

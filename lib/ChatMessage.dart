@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:realtimechatapp/ChatDb.dart';
@@ -6,17 +7,19 @@ import 'package:realtimechatapp/Messages.dart';
 import 'package:realtimechatapp/PopumMenu.dart';
 import 'package:realtimechatapp/state/user/UserCubit.dart';
 import 'package:intl/intl.dart';
+import "dart:developer";
 
 class ChatMessage extends StatefulWidget {
-  ChatMessage({
-    super.key,
-    required this.message,
-    required this.chatId,
-    required this.prevMessage,
-  });
+  ChatMessage(
+      {super.key,
+      required this.message,
+      required this.chatId,
+      required this.prevMessage,
+      required this.scrollController});
   dynamic message;
   String chatId;
   String prevMessage;
+  ScrollController scrollController;
 
   @override
   State<ChatMessage> createState() => _ChatMessageState();
@@ -82,6 +85,11 @@ class _ChatMessageState extends State<ChatMessage> {
         ),
       );
     }
+  }
+
+  void _scrollToBottom() {
+    widget.scrollController
+        .jumpTo(widget.scrollController.position.maxScrollExtent);
   }
 
   @override
