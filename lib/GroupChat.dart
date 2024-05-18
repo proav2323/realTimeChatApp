@@ -386,7 +386,13 @@ class _GroupChatState extends State<GroupChat> {
                             snapshot.data!.docs.isEmpty == true) {
                           return const Expanded(child: SizedBox());
                         }
-                        seen();
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (_scrollController.hasClients) {
+                            seen();
+                            _scrollController.jumpTo(
+                                _scrollController.position.maxScrollExtent);
+                          }
+                        });
                         return Expanded(
                             child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,

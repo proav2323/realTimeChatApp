@@ -155,43 +155,37 @@ class _NewChatState extends State<NewChat> {
   void selected(String data) {}
 
   void seen() {
-    if (_scrollController.hasClients) {
-      log("does it run", name: "chekc");
-      if (_scrollController.position.pixels <
-          _scrollController.position.maxScrollExtent) {
+    log("check", name: "cjck");
+    FirebaseFirestore.instance
+        .collection("users")
+        .doc(context.read<UserCubit>().state!.id)
+        .collection("chats")
+        .doc(widget.id)
+        .collection("messages")
+        .where("reciverId", isEqualTo: context.read<UserCubit>().state!.id)
+        .where("seen", isEqualTo: false)
+        .get()
+        .then((value) {
+      value.docs.forEach((element) {
         FirebaseFirestore.instance
             .collection("users")
             .doc(context.read<UserCubit>().state!.id)
             .collection("chats")
             .doc(widget.id)
             .collection("messages")
-            .where("reciverId", isEqualTo: context.read<UserCubit>().state!.id)
-            .where("seen", isEqualTo: false)
-            .get()
-            .then((value) {
-          value.docs.forEach((element) {
-            FirebaseFirestore.instance
-                .collection("users")
-                .doc(context.read<UserCubit>().state!.id)
-                .collection("chats")
-                .doc(widget.id)
-                .collection("messages")
-                .doc(element.get("id"))
-                .update({"seen": true});
+            .doc(element.get("id"))
+            .update({"seen": true});
 
-            FirebaseFirestore.instance
-                .collection("users")
-                .doc(widget.id)
-                .collection("chats")
-                .doc(context.read<UserCubit>().state!.id)
-                .collection("messages")
-                .doc(element.get("id"))
-                .update({"seen": true});
-          });
-        });
-        _scrollToBottom();
-      }
-    }
+        FirebaseFirestore.instance
+            .collection("users")
+            .doc(widget.id)
+            .collection("chats")
+            .doc(context.read<UserCubit>().state!.id)
+            .collection("messages")
+            .doc(element.get("id"))
+            .update({"seen": true});
+      });
+    });
   }
 
   @override
@@ -311,7 +305,13 @@ class _NewChatState extends State<NewChat> {
                             snapshot.data!.docs.isEmpty == true) {
                           return const Expanded(child: SizedBox());
                         }
-                        seen();
+                        WidgetsBinding.instance.addPostFrameCallback((_) {
+                          if (_scrollController.hasClients) {
+                            seen();
+                            _scrollController.jumpTo(
+                                _scrollController.position.maxScrollExtent);
+                          }
+                        });
                         return Expanded(
                             child: Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
