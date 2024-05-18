@@ -81,7 +81,7 @@ class Messaging {
   }
 
   Future<bool> sendGroupPushNotification(String groupId, String senderId,
-      String message, List<String> membersToken) async {
+      String message, List<dynamic> membersToken) async {
     await http.post(
         Uri.https("realtimechatappbackend-p1b7.onrender.com", "sendGroup"),
         body: json.encode({

@@ -1,8 +1,9 @@
-import 'dart:math';
+import 'dart:math' as math;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:realtimechatapp/Auth.dart';
 import 'package:realtimechatapp/ChatMessage.dart';
 import 'package:realtimechatapp/EditDailog.dart';
 import 'package:realtimechatapp/EditGroupDialog.dart';
@@ -11,9 +12,12 @@ import 'package:realtimechatapp/GroupDb.dart';
 import 'package:realtimechatapp/GroupMembers.dart';
 import 'package:realtimechatapp/GroupMessageUi.dart';
 import 'package:realtimechatapp/Input.dart';
+import 'package:realtimechatapp/Messaging.dart';
 import 'package:realtimechatapp/PopumMenu.dart';
+import 'package:realtimechatapp/User.dart';
 import 'package:realtimechatapp/pages/Home.dart';
 import 'package:realtimechatapp/state/user/UserCubit.dart';
+import "dart:developer";
 
 class GroupChat extends StatefulWidget {
   GroupChat(
@@ -129,24 +133,40 @@ class _GroupChatState extends State<GroupChat> {
     _scrollController.dispose();
   }
 
-  void sendMessage() {
+  void sendMessage() async {
     if (context.read<UserCubit>().state != null &&
         search.text != "" &&
         chat != null) {
       List<dynamic> members = chat!.members
           .where((data) => data != context.read<UserCubit>().state!.id)
           .toList();
+
+      List<dynamic> membersTokens = [];
+      for (int i = 0; i < members.length; i++) {
+        User user = await Auth(callback: () {}).getUserDb(members[i]);
+        user.token.forEach((element) {
+          membersTokens.add(element);
+        });
+      }
       GroupDb()
           .sendMessage(search.text, context.read<UserCubit>().state!.id,
               chat!.id, members)
           .then((value) {
+        log(membersTokens.toString(), name: "check");
         if (value == true) {
+          Messaging()
+              .sendGroupPushNotification(
+                  chat!.id,
+                  context.read<UserCubit>().state!.id,
+                  search.text,
+                  membersTokens)
+              .then((value) {
+            if (value == true) {}
+          });
           search.clear();
           if (_scrollController.hasClients) {
             _scrollToBottom();
           }
-          ScaffoldMessenger.of(context)
-              .showSnackBar(const SnackBar(content: Text("message send")));
         }
       });
     }
@@ -395,8 +415,8 @@ class _GroupChatState extends State<GroupChat> {
                                             prevMessage: widget.userUi
                                                 ? ""
                                                 : widget.chatLastMessage!,
-                                            key:
-                                                Key("${Random().nextDouble()}"),
+                                            key: Key(
+                                                "${math.Random().nextDouble()}"),
                                           );
                                         })
                                         .toList()

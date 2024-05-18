@@ -11,6 +11,7 @@ import 'package:realtimechatapp/Auth.dart';
 import 'package:realtimechatapp/Chat.dart';
 import 'package:realtimechatapp/ChatDb.dart';
 import 'package:realtimechatapp/ChatUi.dart';
+import 'package:realtimechatapp/GroupChat.dart';
 import 'package:realtimechatapp/GroupUi.dart';
 import 'package:realtimechatapp/Input.dart';
 import 'package:realtimechatapp/Messaging.dart';
@@ -93,6 +94,15 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
         Navigator.of(context).push(MaterialPageRoute(
             builder: (context) =>
                 NewChat(id: message.data['senderId'], userUi: false)));
+      }
+    } else if (message.data['type'] == "group") {
+      if (auth.currentUser != null) {
+        Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => GroupChat(
+                  id: message.data['groupId'],
+                  userUi: false,
+                  chatLastMessage: message.data['chatLastMessage'],
+                )));
       }
     }
   }
