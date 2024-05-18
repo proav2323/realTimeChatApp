@@ -160,7 +160,7 @@ class _MyHomePageState extends State<MyHomePage> with WidgetsBindingObserver {
               (Route<dynamic> route) => false);
         } else {
           Messaging().updateToken(
-              auth.currentUser!.uid, Messaging().fcmTokenn ?? "no token");
+              auth.currentUser!.uid, Messaging.fcmTokenn ?? "no token");
         }
       });
     } else {

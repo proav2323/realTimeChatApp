@@ -9,7 +9,7 @@ import 'package:http/http.dart' as http;
 class Messaging {
   NotificationSettings? notificationSettings;
   String? apnsToken;
-  String? fcmTokenn;
+  static String? fcmTokenn;
   FirebaseFirestore db = FirebaseFirestore.instance;
 
   Future<void> init() async {
